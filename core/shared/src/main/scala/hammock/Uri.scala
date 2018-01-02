@@ -136,7 +136,7 @@ object Uri {
 
   implicit val showAuthority: Show[Authority] = new Show[Authority] {
     def show(auth: Authority): String =
-      auth.user.fold("")(_ ++ "@") ++ auth.host.show ++ auth.port.fold("")(p => s":${p.toString}")
+      auth.user.filterNot(_.isEmpty).fold("")(_ ++ "@") ++ auth.host.show ++ auth.port.fold("")(p => s":${p.toString}")
   }
 
   object Authority {
@@ -161,8 +161,11 @@ object Uri {
         u.query.map(kv => s"${kv._1}=${kv._2}").mkString("?", "&", "")
       }
 
-      u.scheme.fold("")(_ ++ "://") ++ u.authority.fold("")(_.show) ++ u.path ++ queryString ++ u.fragment.fold("")(
-        "#" ++ _)
+      u.scheme.filterNot(_.isEmpty).fold("")(_ ++ "://") ++
+        u.authority.fold("")(_.show) ++
+        u.path ++
+        queryString ++
+        u.fragment.filterNot(_.isEmpty).fold("")("#" ++ _)
     }
   }
 
