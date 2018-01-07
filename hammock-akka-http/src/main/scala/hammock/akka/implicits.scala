@@ -13,10 +13,17 @@ trait Implicits {
     }
   }
 
-  implicit def decoderFromEntityUnmarshaller[A: Decoder]: FromEntityUnmarshaller[A] =
+  implicit def stringDecoderFromEntityUnmarshaller(implicit D: Decoder[String]): FromEntityUnmarshaller[String] =
     PredefinedFromEntityUnmarshallers.stringUnmarshaller
-      .map(str => Decoder[A].decode(Entity.StringEntity(str)))
+      .map(str => D.decode(Entity.StringEntity(str)))
       .map(_.fold(throw _, identity))
+
+  implicit def byteArrayDecoderFromEntityUnmarshaller(
+      implicit D: Decoder[Array[Byte]]): FromEntityUnmarshaller[Array[Byte]] =
+    PredefinedFromEntityUnmarshallers.byteArrayUnmarshaller
+      .map(str => D.decode(Entity.ByteArrayEntity(str)))
+      .map(_.fold(throw _, identity))
+
 }
 
 object implicits extends Implicits
